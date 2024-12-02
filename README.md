@@ -1,8 +1,8 @@
-# VKR_2026
+# VKR_2024
 
 ## Project Overview
 
-VKR_2026 is a Flask-based application designed to provide backend functionality and dynamic HTML templates. This project includes core scripts and templates for deployment. Follow the steps below to install, configure, and run the application locally.
+VKR_2024 is a Flask-based application designed to provide backend functionality and dynamic HTML templates. This project includes core scripts and templates for deployment. Follow the steps below to install, configure, and run the application locally.
 
 ---
 
@@ -15,7 +15,7 @@ VKR_2026 is a Flask-based application designed to provide backend functionality 
 ### 2. Clone the Repository
 Clone the project repository using the following command:
 ```bash
-git clone https://github.com/bombermon/VKR_2026.git
+git clone https://github.com/bombermon/VKR_2024.git
 cd VKR_2026
 ```
 
