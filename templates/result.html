@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Analysis Results</h2>
+
+        <div class="results">
+            <div class="result-column">
+                <h3>Photo 1</h3>
+                <!-- Изображение 1 -->
+                <img src="{{ url_for('static', filename='uploads/' + img1_filename) }}" alt="Photo 1" class="result-image">
+
+                <ul class="result-list">
+                    {% for key, value in result1.items() %}
+                        <li><span>{{ key }}:</span> {{ value }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="result-column">
+                <h3>Photo 2</h3>
+                <!-- Изображение 2 -->
+                <img src="{{ url_for('static', filename='uploads/' + img2_filename) }}" alt="Photo 2" class="result-image">
+
+                <ul class="result-list">
+                    {% for key, value in result2.items() %}
+                        <li><span>{{ key }}:</span> {{ value }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <a href="{{ url_for('index') }}" class="home-link">Back to Home</a>
+    </div>
+</body>
+</html>
