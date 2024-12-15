@@ -12,19 +12,19 @@ app.secret_key = 'your_secret_key'
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg'}
 
-# Константы
+#
 MODEL_PATH = "personality_net.pth"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-IMAGE_SIZE = 224  # Размер изображения для модели
+IMAGE_SIZE = 224  # Model image size
 
-# Подготовка трансформации
+# Preparing the transformation
 test_transform = transforms.Compose([
     transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
 ])
 
-# Модель
+# Model
 class PersonalityNet(nn.Module):
     def __init__(self, num_classes):
         super(PersonalityNet, self).__init__()
@@ -34,23 +34,23 @@ class PersonalityNet(nn.Module):
     def forward(self, x):
         return torch.sigmoid(self.model(x))
 
-# Загрузка модели
+# model loading
 model = PersonalityNet(40).to(DEVICE)
 model.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
 model.eval()
 
-# Функция для анализа изображения
+# image analyze function
 def analyze_photo_with_model(photo_path):
     try:
-        # Загрузка изображения
+        # Uploading an image
         image = Image.open(photo_path).convert("RGB")
         input_tensor = test_transform(image).unsqueeze(0).to(DEVICE)
 
-        # Прогнозирование
+        # Prognostication
         with torch.no_grad():
             prediction = model(input_tensor).cpu().numpy().flatten()
 
-        # Преобразование в словарь
+        # Convert to dictionary
         decoded_predictions = {attr: float(prob) for attr, prob in zip(attribute_names, prediction)}
 
         return decoded_predictions
@@ -59,40 +59,40 @@ def analyze_photo_with_model(photo_path):
         print(f"Ошибка в анализе изображения: {e}")
         return None
 
-# Проверка расширений файлов
+# Checking file extensions
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
-# Главная страница
+# Main page
 @app.route('/')
 def index():
     if 'username' in session:
         return render_template('index.html')
     return redirect(url_for('login'))
 
-# Страница регистрации
+# Registration page
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        # Тут нужно добавить сохранение пользователя в базу данных
+        # TODO add saving the user to the database
         session['username'] = username
         return redirect(url_for('index'))
     return render_template('register.html')
 
-# Страница авторизации
+# Login page
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        # Тут нужно добавить проверку пользователя из базы данных
+        # TODO add user verification from the database
         session['username'] = username
         return redirect(url_for('index'))
     return render_template('login.html')
 
-# Страница загрузки фотографий
+# Photo upload page
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     if 'username' not in session:
@@ -107,11 +107,11 @@ def upload():
             file1.save(os.path.join(app.config['UPLOAD_FOLDER'], filename1))
             file2.save(os.path.join(app.config['UPLOAD_FOLDER'], filename2))
 
-            # Анализируем изображения
+            # Analyzing images
             result1 = analyze_photo_with_model(os.path.join(app.config['UPLOAD_FOLDER'], filename1))
             result2 = analyze_photo_with_model(os.path.join(app.config['UPLOAD_FOLDER'], filename2))
 
-            # Передаем изображения и результаты в шаблон
+            # Passing images and results to the template
             return render_template('result.html',
                                    result1=result1,
                                    result2=result2,
@@ -121,7 +121,7 @@ def upload():
     return render_template('upload.html')
 
 
-# Выход из аккаунта
+# Logout
 @app.route('/logout')
 def logout():
     session.pop('username', None)
