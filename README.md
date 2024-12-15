@@ -16,7 +16,7 @@ VKR_2024 is a Flask-based application designed to provide backend functionality 
 Clone the project repository using the following command:
 ```bash
 git clone https://github.com/bombermon/VKR_2024.git
-cd VKR_2026
+cd VKR_2024
 ```
 
 ### 4. Create and Activate a Virtual Environment
