@@ -26,6 +26,7 @@ test_transform = transforms.Compose([
     transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
 ])
 
+
 # Model
 class PersonalityNet(nn.Module):
     def __init__(self, num_classes):
@@ -36,10 +37,12 @@ class PersonalityNet(nn.Module):
     def forward(self, x):
         return torch.sigmoid(self.model(x))
 
+
 # model loading
 model = PersonalityNet(40).to(DEVICE)
 model.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
 model.eval()
+
 
 # Database setup
 def init_db():
@@ -52,7 +55,9 @@ def init_db():
     conn.commit()
     conn.close()
 
+
 init_db()
+
 
 # image analyze function
 def analyze_photo_with_model(photo_path):
@@ -74,9 +79,11 @@ def analyze_photo_with_model(photo_path):
         print(f"Ошибка в анализе изображения: {e}")
         return None
 
+
 # Checking file extensions
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
 
 # Main page
 @app.route('/')
@@ -84,6 +91,7 @@ def index():
     if 'username' in session:
         return render_template('index.html')
     return redirect(url_for('login'))
+
 
 # Registration page
 @app.route('/register', methods=['GET', 'POST'])
@@ -107,6 +115,7 @@ def register():
 
     return render_template('register.html')
 
+
 # Login page
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -128,6 +137,7 @@ def login():
             return render_template('login.html', error=error)
 
     return render_template('login.html')
+
 
 # Photo upload page
 @app.route('/upload', methods=['GET', 'POST'])
@@ -163,6 +173,7 @@ def upload():
 def logout():
     session.pop('username', None)
     return redirect(url_for('login'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
