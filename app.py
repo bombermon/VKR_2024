@@ -1,11 +1,13 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
 from PIL import Image
 import torch
 from torch import nn
 from torchvision import transforms, models
 import os
 from storage import attribute_names
+import sqlite3  # Added for database support
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -38,6 +40,19 @@ class PersonalityNet(nn.Module):
 model = PersonalityNet(40).to(DEVICE)
 model.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
 model.eval()
+
+# Database setup
+def init_db():
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute('''CREATE TABLE IF NOT EXISTS users (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        username TEXT UNIQUE NOT NULL,
+                        password TEXT NOT NULL)''')
+    conn.commit()
+    conn.close()
+
+init_db()
 
 # image analyze function
 def analyze_photo_with_model(photo_path):
@@ -76,9 +91,20 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        # TODO add saving the user to the database
-        session['username'] = username
-        return redirect(url_for('index'))
+        hashed_password = generate_password_hash(password)  # Hash the password
+
+        try:
+            conn = sqlite3.connect('users.db')
+            cursor = conn.cursor()
+            cursor.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, hashed_password))
+            conn.commit()
+            conn.close()
+            session['username'] = username
+            return redirect(url_for('index'))
+        except sqlite3.IntegrityError:
+            error = "Username already exists. Please choose a different one."
+            return render_template('register.html', error=error)
+
     return render_template('register.html')
 
 # Login page
@@ -87,9 +113,20 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        # TODO add user verification from the database
-        session['username'] = username
-        return redirect(url_for('index'))
+
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+        cursor.execute('SELECT password FROM users WHERE username = ?', (username,))
+        result = cursor.fetchone()
+        conn.close()
+
+        if result and check_password_hash(result[0], password):
+            session['username'] = username
+            return redirect(url_for('index'))
+        else:
+            error = "Invalid username or password."
+            return render_template('login.html', error=error)
+
     return render_template('login.html')
 
 # Photo upload page
